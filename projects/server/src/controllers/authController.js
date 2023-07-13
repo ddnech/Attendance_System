@@ -2,82 +2,26 @@ const bcrypt = require("bcrypt");
 const db = require("../models");
 const jwt = require("jsonwebtoken");
 
-
 const generateJWTToken = (user) => {
   const token = jwt.sign(
     {
       id: user.id,
-      role_id:user.role_id
+      role_id: user.role_id,
     },
     process.env.JWT_SECRET_KEY,
-    { expiresIn: '7d' }
+    { expiresIn: "7d" }
   );
   return token;
 };
 
 module.exports = {
-  async registerUser(req, res) {
-    const { username, storeName, email, phone, address, password } = req.body;
-
-    try {
-      const isExist = await db.User.findOne({
-        where: {
-          [db.Sequelize.Op.or]: [
-            { username },
-            { storeName },
-            { email },
-            { phone },
-          ],
-        },
-      });
-
-      if (isExist) {
-        res.status(400).send({
-          message:
-            "username / store name / email / phone number already registered",
-        });
-        return;
-      }
-      const salt = await bcrypt.genSalt(10);
-      const hashPassword = await bcrypt.hash(password, salt);
-
-      const newUser = await db.User.create({
-        username,
-        storeName,
-        email,
-        phone,
-        address,
-        password: hashPassword,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      return res.status(201).send({
-        message: "Registration success. Welcome!",
-        data: {
-          username: newUser.username,
-          imgProfile: newUser.imgProfile,
-          storeName: newUser.storeName,
-          email: newUser.email,
-          phone: newUser.phone,
-          address: newUser.address,
-        },
-      });
-    } catch (error) {
-      res.status(500).send({
-        message: "Fatal error on server",
-        errors: error.message,
-      });
-    }
-  },
-
   async loginUser(req, res) {
     try {
-      const { username, password } = req.body;
+      const { email, password } = req.body;
 
       const user = await db.User.findOne({
         where: {
-            username:username
+          email,
         },
       });
 
@@ -86,51 +30,49 @@ module.exports = {
 
         if (passwordMatch) {
           const token = generateJWTToken(user);
-          res.json({ message: "Login successful", token,});
+          return res.status(200).send({ message: "Login successful", token });
         } else {
-          res.status(401).json({ error: "Invalid credentials" });
+          res.status(401).send({ error: "Invalid credentials" });
         }
-      } else {
-        res.status(401).json({ error: "Invalid credentials" });
       }
     } catch (error) {
       console.error("Error during login:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).send({ error: "Internal server error" });
     }
   },
 
-  async setPassword (req,res) {
+  async setPassword(req, res) {
     try {
-      const {password} = req.body;
-      const setPasswordToken = req.query.token
-  
+      const { password } = req.body;
+      const setPasswordToken = req.query.token;
+
       const existToken = await db.User.findOne({
         where: { setPasswordToken },
       });
-  
+
       if (!existToken) {
         return res.status(404).send({
           message: "Token invalid",
         });
       }
-  
+
       const tokenCA = new Date(existToken.setPasswordTokenExpired);
       const now = new Date();
-  
+
       if (now > tokenCA) {
         return res.status(400).send({
           message: "token is already expired",
         });
       }
-  
+
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+
       existToken.password = hashedPassword;
       existToken.setPasswordToken = null;
       existToken.setPasswordTokenExpires = null;
-      
+
       await existToken.save();
-  
+
       return res.status(200).send({
         message: "Password has been set succesfully, try login now",
       });
@@ -140,5 +82,5 @@ module.exports = {
         message: "Internal Server Error",
       });
     }
-  }
+  },
 };
