@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const fs = require('fs');
 const hbs = require("handlebars");
+const dayjs = require('dayjs');
 
 const transporter = nodemailer.createTransport({
   service: process.env.service_email,
@@ -59,7 +60,9 @@ module.exports = {
           salary_id = newSalary.id;
         }
       }
-      const verificationToken = crypto.randomBytes(20).toString('hex');
+      const expirationDate = dayjs().add(1, 'hour');
+      const setPasswordToken = crypto.randomBytes(20).toString('hex');
+      const expiredsetPasswordToken = expirationDate.toDate();
       
       const newUser = await db.User.create({
         email,
@@ -69,12 +72,14 @@ module.exports = {
         join_date,
         role_id,
         salary_id,
-        verificationToken,
+        isVerify: false,
+        setPasswordToken,
+        expiredsetPasswordToken,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
 
-    const verificationLink = `${process.env.link_email}${verificationToken}`;
+    const verificationLink = `${process.env.link_email}${setPasswordToken}`;
     const path = require('path');
     const templatePath = path.join(__dirname, '../templates/passwordAccount.html');
 

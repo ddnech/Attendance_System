@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const db = require("../models");
 const jwt = require("jsonwebtoken");
 
+
 const generateJWTToken = (user) => {
   const token = jwt.sign(
     {
@@ -98,9 +99,9 @@ module.exports = {
     }
   },
 
-  async resetPassword (req,res) {
+  async setPassword (req,res) {
     try {
-      const {setPassword} = req.body;
+      const {password} = req.body;
       const setPasswordToken = req.query.token
   
       const existToken = await db.User.findOne({
@@ -113,7 +114,7 @@ module.exports = {
         });
       }
   
-      const tokenCA = new Date(existToken.setPasswordToken);
+      const tokenCA = new Date(existToken.setPasswordTokenExpired);
       const now = new Date();
   
       if (now > tokenCA) {
@@ -122,16 +123,16 @@ module.exports = {
         });
       }
   
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
       
       existToken.password = hashedPassword;
       existToken.setPasswordToken = null;
-      existToken.expiredResetPasswordToken = null;
+      existToken.setPasswordTokenExpires = null;
       
       await existToken.save();
   
       return res.status(200).send({
-        message: "Reset password succesfully, try login now",
+        message: "Password has been set succesfully, try login now",
       });
     } catch (error) {
       console.log(error);

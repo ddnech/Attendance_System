@@ -122,66 +122,6 @@ module.exports = {
       .withMessage("Minimum password length is 8 characters"),
   ]),
 
-  validateProduct: validate([
-    body("name")
-      .trim()
-      .notEmpty()
-      .withMessage("Product name is required")
-      .isLength({ max: 50 })
-      .withMessage("Maximum character is 50"),
-    body("price")
-      .trim()
-      .notEmpty()
-      .withMessage("Price is required")
-      .isFloat({ gt: 0 })
-      .withMessage("Price must be a valid number")
-      .isLength({ max: 1000000000 })
-      .withMessage("Price must not exceed 1,000,000,000"),
-    body("description")
-      .notEmpty()
-      .withMessage("Description is required")
-      .isLength({ max: 200 })
-      .withMessage("Maximum character is 200"),
-    body("stock")
-      .notEmpty()
-      .isInt({ gt: 0, lte: 999 })
-      .withMessage("Stock must be a valid number and not exceed 999"),
-  ]),
-
-  updateProduct: validate([
-    body("name")
-    .optional()
-    .trim()
-    .isLength({ max: 50 })
-    .withMessage("Name must not exceed 50 characters"),
-    body("price")
-    .optional()
-    .custom((value, { req }) => {
-      if (value !== "" && isNaN(value)) {
-        throw new Error("Price must be a valid number");
-      }
-      if (value !== "" && (parseFloat(value) <= 0 || parseFloat(value) > 1000000000)) {
-        throw new Error("Price must be a valid number and not exceed 1000000000");
-      }
-      return true;
-    }),
-    body("description")
-      .optional()
-      .isLength({ max: 200 })
-      .withMessage("Maximum character is 200"),
-      body("stock")
-      .optional()
-      .custom((value, { req }) => {
-        if (value !== "" && isNaN(value)) {
-          throw new Error("Stock must be a valid number");
-        }
-        if (value !== "" && (parseInt(value) <= 0 || parseInt(value) > 999)) {
-          throw new Error("Stock must be a valid number and not exceed 999");
-        }
-        return true;
-      }),
-  ]),
-
   validateLogin: validate([
     body("username").notEmpty().withMessage("Username is required"),
     body("password")
@@ -191,58 +131,9 @@ module.exports = {
       .withMessage("Minimum password length is 8 characters"),
   ]),
 
-  createCategory: validate([
-    body("name")
-      .notEmpty()
-      .withMessage("Category name is required")
-      .custom(async (value, { req }) => {
-        try {
-          const category = await db.Category.findOne({
-            where: { name: value },
-          });
-          if (category) {
-            throw new Error("Category name already exist");
-          }
-          return true;
-        } catch (error) {
-          throw new Error(error.message);
-        }
-      }),
-  ]),
-
-  updateCategory: validate([
-    body("name")
-      .notEmpty()
-      .withMessage("Category name is required")
-      .custom(async (value, { req }) => {
-        try {
-          const category = await db.Category.findOne({
-            where: { name: value },
-          });
-          if (category) {
-            throw new Error("Category name already exist");
-          }
-          return true;
-        } catch (error) {
-          throw new Error(error.message);
-        }
-      }),
-  ]),
-
-  addToCart: validate([
-    body("quantity")
-      .notEmpty()
-      .withMessage("quantity is required")
-      .isInt({ min: 1 })
-      .withMessage("Quantity must be a positive integer"),
-  ]),
-
-  checkoutAddress: validate([
-    body("address").notEmpty().withMessage("Address is required"),
-  ]),
 
   validateSetPassword: validate([
-    body("setPassword")
+    body("password")
       .notEmpty()
       .withMessage("password is required")
       .isStrongPassword({
@@ -253,7 +144,7 @@ module.exports = {
     })
       .withMessage("Password must be 6 letters long and contain at least 1 uppercase letter, 1 number, and 1 symbol")
       .custom((value, { req }) => {
-        if (value !== req.body.confirmNewPassword) {
+        if (value !== req.body.confirmPassword) {
           throw new Error("confirm setPassword does not match with password");
         }
         return true;

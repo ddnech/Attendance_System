@@ -16,7 +16,7 @@ router.post(
 router.post(
   "/set-pass",
   validatorMiddleware.validateSetPassword,
-  authController.resetPassword
+  authController.setPassword
 )
 
 module.exports = router;

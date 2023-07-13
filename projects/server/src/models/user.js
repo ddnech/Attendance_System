@@ -23,8 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     role_id: DataTypes.INTEGER,
     salary_id: DataTypes.INTEGER,
     isVerify: DataTypes.INTEGER,
-    verificationToken: DataTypes.STRING,
-    verificationTokenExpires: DataTypes.DATE
+    setPasswordToken: DataTypes.STRING,
+    setPasswordTokenExpires: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'User',
