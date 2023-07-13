@@ -123,9 +123,10 @@ module.exports = {
   ]),
 
   validateLogin: validate([
-    body("username").notEmpty().withMessage("Username is required"),
-    body("password")
-      .notEmpty()
+    body("email").notEmpty().withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please enter with email format"),
+    body("password").notEmpty()
       .withMessage("Password is required")
       .isLength({ min: 8 })
       .withMessage("Minimum password length is 8 characters"),
