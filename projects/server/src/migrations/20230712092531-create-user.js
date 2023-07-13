@@ -16,7 +16,7 @@ module.exports = {
       },
       username: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false, //remove this log in by email
       },
       full_name: {
         type: Sequelize.STRING,
@@ -53,11 +53,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: false,
       },
-      verificationToken: {
+      setPasswordToken: {
         type: Sequelize.STRING,
         defaultValue: null,
       },
-      verificationTokenExpires: {
+      setPasswordTokenExpires: {
         type: Sequelize.DATE,
         defaultValue: null,
       },
