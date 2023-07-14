@@ -1,4 +1,4 @@
-import LoginUser from "../component/user/loginUser"
+import LoginUser from "../component/user/Login"
 
 export default function LogIn() {
   return (

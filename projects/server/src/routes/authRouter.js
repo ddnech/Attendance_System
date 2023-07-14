@@ -10,13 +10,19 @@ const router = require("express").Router();
 
 router.post(
   "/login",
-  validatorMiddleware.validateLogin,
+  //validatorMiddleware.validateLogin,
   authController.loginUser);
 
 router.post(
   "/set-pass",
-  validatorMiddleware.validateSetPassword,
+  //validatorMiddleware.validateSetPassword,
   authController.setPassword
+)
+
+router.get(
+  "/profile",
+  //validatorMiddleware.validateSetPassword,
+  authController.getUserProfileToken
 )
 
 module.exports = router;
