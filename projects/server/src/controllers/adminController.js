@@ -15,111 +15,75 @@ const transporter = nodemailer.createTransport({
 
 module.exports = {
   async registerUser(req, res) {
-    const {
-      email,
-      username,
-      full_name,
-      birthdate,
-      join_date,
-      role_id,
-      salary,
-    } = req.body;
-
-    if (req.user.role_id !== 1) {
-
-      res.status(403).send({
-        message: "Unauthorized. Only admin can register a new user.",
-      });
-      return;
-    }
-
     try {
-      const isExist = await db.User.findOne({
-        where: {
-          [db.Sequelize.Op.or]: [{ email }, { username }],
-        },
-      });
-
-      if (isExist) {
-        res.status(400).send({
-          message: "username / email already registered",
+      const { email, full_name, birth_date, join_date, salary } = req.body;
+      console.log(salary);
+  
+      const transaction = await db.sequelize.transaction();
+  
+      try {
+        const newSalary = await db.Salary.create(
+          { basic_salary: salary },
+          { transaction }
+        );
+  
+        const set_token = crypto.randomBytes(20).toString('hex');
+        const newUser = await db.User.create({
+          email,
+          full_name,
+          birth_date,
+          join_date,
+          role_id: 2,
+          set_token,
+          salary_id: newSalary.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }, { transaction });
+  
+        await transaction.commit();
+  
+        const verificationLink = `${process.env.link_email}${set_token}`;
+        const path = require('path');
+        const templatePath = path.join(__dirname, '../templates/passwordAccount.html');
+  
+  
+        const template = fs.readFileSync(templatePath, "utf-8");
+        const templateCompile = hbs.compile(template);
+        const htmlResult = templateCompile({ username: newUser.username, verificationLink });
+  
+        const mailOptions = {
+          from: process.env.email_name,
+          to: email,
+          subject: 'Account Setup',
+          html: htmlResult,
+        };
+  
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error('Error sending email:', error);
+            res.status(500).send('Internal server error');
+          } else {
+            console.log('Email sent:', info.response);
+            res.status(201).send({
+              message: 'Please set up the account. An email has been sent.',
+              email: newUser.email,
+              full_name: newUser.full_name,
+              birth_date: newUser.birthdate,
+              join_date: newUser.join_date,
+              salary_id: newUser.salary_id,
+            });
+          }
         });
-        return;
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
       }
-
-      // Check if the provided salary already exists
-      let salary_id;
-      if (salary) {
-        const existingSalary = await db.Salary.findOne({
-          where: { salary },
-        });
-        if (existingSalary) {
-          salary_id = existingSalary.id;
-        } else {
-          const newSalary = await db.Salary.create({ salary });
-          salary_id = newSalary.id;
-        }
-      }
-      const expirationDate = dayjs().add(1, 'hour');
-      const setPasswordToken = crypto.randomBytes(20).toString('hex');
-      const expiredsetPasswordToken = expirationDate.toDate();
-      
-      const newUser = await db.User.create({
-        email,
-        username,
-        full_name,
-        birthdate,
-        join_date,
-        role_id,
-        salary_id,
-        isVerify: false,
-        setPasswordToken,
-        expiredsetPasswordToken,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-    const verificationLink = `${process.env.link_email}${setPasswordToken}`;
-    const path = require('path');
-    const templatePath = path.join(__dirname, '../templates/passwordAccount.html');
-
-      // Read the email template file
-    const template = fs.readFileSync(templatePath, "utf-8");
-    // Compile the Handlebars template
-    const templateCompile = hbs.compile(template);
-    const htmlResult = templateCompile({ username, verificationLink });
-
-    const mailOptions = {
-      from: process.env.email_name,
-      to: email,
-      subject: 'Account Password Setup',
-      html: htmlResult,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        res.status(500).send('Internal server error');
-      } else {
-        console.log('Email sent:', info.response);
-        res.status(201).send({
-          message: 'Please set your password. An email has been sent.',
-          email: newUser.email,
-          username: newUser.username,
-          full_name: newUser.full_name,
-          birthdate: newUser.birthdate,
-          join_date: newUser.join_date,
-          role_id: newUser.role_id,
-          salary_id: newUser.salary_id,
-        });
-      }
-    });
-
     } catch (error) {
       res.status(500).send({
-        message: "Fatal error on server",
+        message: "Internal Server errorr",
         errors: error.message,
       });
     }
   },
+  
 };

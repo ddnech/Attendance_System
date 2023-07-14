@@ -16,7 +16,10 @@ module.exports = (sequelize, DataTypes) => {
   AttendanceLog.init({
     clockIn: DataTypes.DATE,
     clockOut: DataTypes.DATE,
-    userId: DataTypes.INTEGER
+    userId: DataTypes.INTEGER,
+    status: {
+      type: DataTypes.ENUM('absent', 'half-day', 'full-day'),
+    },
   }, {
     sequelize,
     modelName: 'AttendanceLog',

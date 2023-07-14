@@ -14,20 +14,11 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
-      username: {
-        type: Sequelize.STRING,
-        allowNull: false, //remove this log in by email
-      },
       full_name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: true,
-        defaultValue: null,
-      },
-      birthdate: {
+      birth_date: {
         type: Sequelize.DATE,
         allowNull: false,
       },
@@ -35,31 +26,31 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      set_token: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       role_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: "Roles", key: "id" },
-        onUpdate: "CASCADE",
+        references: {
+          model: "Roles",
+          key: "id",
+        },
         onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       salary_id: {
         type: Sequelize.INTEGER,
-        references: { model: "Salaries", key: "id" },
+        references: {
+          model: "Salaries",
+          key: "id",
+        },
+        onDelete: "CASCADE",
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-        allowNull: true,
-      },
-      isVerify: {
-        type: Sequelize.INTEGER,
-        defaultValue: false,
-      },
-      setPasswordToken: {
-        type: Sequelize.STRING,
-        defaultValue: null,
-      },
-      setPasswordTokenExpires: {
-        type: Sequelize.DATE,
-        defaultValue: null,
       },
       createdAt: {
         allowNull: false,

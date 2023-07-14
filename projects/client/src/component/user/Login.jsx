@@ -14,12 +14,12 @@ export default function LoginUser() {
   const dispatch = useDispatch();
 
   const initialValues = {
-    username: "",
+    email: "",
     password: "",
   };
 
   const validationSchema = Yup.object().shape({
-    username: Yup.string().required("Username is required"),
+    email: Yup.string().required("Email is required"),
     password: Yup.string().required("Password is required"),
   });
 
@@ -45,8 +45,7 @@ export default function LoginUser() {
         throw new Error("Login failed");
       }
     } catch (error) {
-      setFieldError("username", "Incorrect username or password");
-      
+      setFieldError("email", "Incorrect email or password");
       setStatus({ success: false });
     } finally {
       setSubmitting(false);
@@ -75,20 +74,20 @@ export default function LoginUser() {
                   Login
                 </h2>
                 <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm">
-                  Please enter your username and password:
+                  Please enter your email and password:
                 </p>
                 <div className="grid grid-cols-1 mt-7 mb-1 pb-3">
                   <div className="font-Roboto relative">
                     <ErrorMessage
-                      name="username"
+                      name="email"
                       component="div"
                       className="text-redd text-xs absolute -top-5"
                     />
                     <Field
                       className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
                       type="text"
-                      name="username"
-                      placeholder="Username"
+                      name="email"
+                      placeholder="Email"
                     />
                   </div>
                 </div>

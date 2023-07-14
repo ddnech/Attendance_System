@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Salary.init({
-    salary: DataTypes.INTEGER,
+    basic_salary: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Salary',

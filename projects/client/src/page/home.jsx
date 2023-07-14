@@ -1,20 +1,20 @@
 import React from "react";
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";
+import StaffRegistrationForm from "../component/admin/StaffRegiser";
 
 export default function Home() {
   return (
-    <div className="flex bg-white min-h-screen">
-      <div className="w-16">
+    <div className="relative bg-white min-h-screen grid grid-cols-[auto,1fr]">
+      <div className="h full">
         <Sidebar />
       </div>
-      <div className="flex-grow">
+      <div>
         <Header />
-        <div className="bg-t h-full">
-            hi
-        </div>
-        {/* Add any other components or content below the Header */}
+        <StaffRegistrationForm/>
       </div>
     </div>
   );
 }
+
+
