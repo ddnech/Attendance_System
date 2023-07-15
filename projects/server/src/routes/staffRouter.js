@@ -7,6 +7,7 @@ const router = require("express").Router();
 
 router.post("/clock-in",authMiddleware.verifyToken, staffController.clockIn);
 router.patch("/clock-out",authMiddleware.verifyToken, staffController.clockOut);
+router.post('/attendance/history',authMiddleware.verifyToken,staffController.getAttendanceHistory);
 
 
 module.exports = router;
