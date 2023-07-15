@@ -32,7 +32,7 @@ export default function SetPassword() {
     };
 
     fetchUser();
-  }, [token]);
+  }, [token, navigate]);
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     const { password, confirm_password, full_name, birth_date } = values;
@@ -66,13 +66,6 @@ export default function SetPassword() {
     birth_date: Yup.date(),
   });
 
-  const initialValues = {
-    password: "",
-    confirm_password: "",
-    full_name: "",
-    birth_date: "",
-  };
-
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -97,102 +90,94 @@ export default function SetPassword() {
                 Birth Date:{" "}
                 {new Date(user.birth_date).toISOString().split("T")[0]}
               </p>
-            </div>
-          )}
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting, status, values }) => (
-              <Form className="relative justify-center">
-                <div className="grid justify-center items-center">
-                  <h2 className="w-72 text-xl text-center font-Roboto text-jetblack tracking-wide font-semibold sm:text-2xl">
-                    Set Your Account
-                  </h2>
-                </div>
-                <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm">
-                  Please enter your password and other optional details:
-                </p>
-                <div className="grid grid-cols-1 mt-7 mb-1 pb-3">
-                  <div className="font-Roboto relative">
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="text-redd text-xs absolute -top-5"
-                    />
-                    <Field
-                      className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Password"
-                    />
-                    <div className="absolute right-1 top-1/2 transform pt-1 -translate-y-1/2">
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="text-gray-500 focus:outline-none"
-                      >
-                        {showPassword ? (
-                          <AiOutlineEye size={15} />
-                        ) : (
-                          <AiOutlineEyeInvisible size={15} />
-                        )}
-                      </button>
+              <Formik
+                initialValues={{
+                  password: "",
+                  confirm_password: "",
+                  full_name: user.full_name,
+                  birth_date: new Date(user.birth_date).toISOString().split("T")[0],
+                }}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ isSubmitting, status, values }) => (
+                  <Form className="relative justify-center">
+                    <div className="grid justify-center items-center">
+                      <h2 className="w-72 text-xl text-center font-Roboto text-jetblack tracking-wide font-semibold sm:text-2xl">
+                        Set Your Account
+                      </h2>
                     </div>
-                  </div>
-                  <div className="font-Roboto relative mt-6">
-                    <ErrorMessage
-                      name="confirm_password"
-                      component="div"
-                      className="text-redd text-xs absolute -top-5"
-                    />
-                    <Field
-                      className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
-                      type="password"
-                      name="confirm_password"
-                      placeholder="Confirm Password"
-                    />
-                  </div>
-                  <div className="font-Roboto relative mt-4">
-                    <ErrorMessage
-                      name="full_name"
-                      component="div"
-                      className="text-redd text-xs absolute -top-5"
-                    />
-                    <Field
-                      className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
-                      type="text"
-                      name="full_name"
-                      placeholder="Full Name (optional)"
-                    />
-                  </div>
-                  <div className="font-Roboto relative mt-4">
-                    <ErrorMessage
-                      name="birth_date"
-                      component="div"
-                      className="text-redd text-xs absolute -top-5"
-                    />
-                    <Field
-                      className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
-                      type="date"
-                      name="birth_date"
-                      placeholder="Birth Date (optional)"
-                    />
-                  </div>
-                  <div className="text-center mt-8">
+                    <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm">
+                      Please enter your password and other optional details:
+                    </p>
+                    <div className="grid grid-cols-1 mt-7 mb-1 pb-3">
+                      <div className="font-Roboto relative">
+                        <ErrorMessage
+                          name="password"
+                          component="div"
+                          className="text-redd text-xs absolute -top-5"
+                        />
+                        <Field
+                          className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          placeholder="Password"
+                        />
+                        <div className="absolute right-1 top-1/2 transform pt-1 -translate-y-1/2">
+                          <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="text-gray-500 focus:outline-none"
+                          >
+                            {showPassword ? (
+                              <AiOutlineEye size={15} />
+                            ) : (
+                              <AiOutlineEyeInvisible size={15} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="font-Roboto relative mt-6">
+                        <ErrorMessage
+                          name="confirm_password"
+                          component="div"
+                          className="text-redd text-xs absolute -top-5"
+                        />
+                        <Field
+                          className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
+                          type={showPassword ? "text" : "password"}
+                          name="confirm_password"
+                          placeholder="Confirm Password"
+                        />
+                      </div>
+                      <div className="font-Roboto relative mt-6">
+                        <Field
+                          className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
+                          type="text"
+                          name="full_name"
+                          placeholder="Full Name"
+                        />
+                      </div>
+                      <div className="font-Roboto relative mt-6">
+                        <Field
+                          className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
+                          type="date"
+                          name="birth_date"
+                        />
+                      </div>
+                    </div>
                     <button
-                      className="w-full py-2 my-4 text-xs font-Roboto tracking-wide border rounded-md bg-steel_b text-flashwhite hover:bg-white hover:text-darkgreen hover:border-darkgreen"
+                      className="w-full py-2 my-4 text-xs font-Roboto tracking-wide border rounded-md bg-steel_b text-white hover:bg-white hover:text-darkgreen hover:border-darkgreen"
                       type="submit"
                       disabled={isSubmitting}
                     >
                       Save Changes
                     </button>
-                  </div>
-                </div>
-              </Form>
-            )}
-          </Formik>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          )}
         </div>
       </div>
     </div>
