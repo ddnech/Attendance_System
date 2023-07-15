@@ -14,9 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   AttendanceLog.init({
-    clockIn: DataTypes.DATE,
-    clockOut: DataTypes.DATE,
-    userId: DataTypes.INTEGER,
+    clock_in: DataTypes.DATE,
+    clock_out: DataTypes.DATE,
+    user_id: DataTypes.INTEGER,
+    date: DataTypes.DATE,
     status: {
       type: DataTypes.ENUM('absent', 'half-day', 'full-day'),
     },

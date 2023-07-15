@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const StaffRegistrationForm = () => {
+  const token = useSelector((state) => state.auth.token)
   const initialValues = {
     email: '',
     full_name: '',
@@ -11,6 +13,7 @@ const StaffRegistrationForm = () => {
     join_date: '',
     salary: '',
   };
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email').required('Required'),
@@ -20,13 +23,19 @@ const StaffRegistrationForm = () => {
     salary: Yup.number().required('Required'),
   });
 
-  const onSubmit = async (values, { setSubmitting }) => {
+  const onSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/register', // update this with your API route
-        values
+        'http://localhost:8000/api/admin/register',
+        values,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      alert('Staff registered successfully!');
+      setIsRegistered(true);
+      resetForm();
     } catch (error) {
       console.error('Error registering staff:', error);
       alert('An error occurred during registration.');
@@ -36,20 +45,25 @@ const StaffRegistrationForm = () => {
   };
 
   return (
-    <div className='flex items-center justify-center h-screen bg-white rounde'>
-      <div className='w-screen grid grid-flow-row justify-center'>
+    <div className='flex  justify-center h-screen bg-white rounde'>
+      <div className='w-fit grid grid-flow-row justify-center'>
         <div>
           <img src={"https://d1csarkz8obe9u.cloudfront.net/posterpreviews/business-logo-design-template-78655edda18bc1196ab28760f1535baa_screen.jpg?ts=1617645324"} alt="Logo" className="w-60 h-60 mx-auto" />
         </div>
         <div>
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-            {({ isSubmitting }) => (
+            {({ isSubmitting, resetForm }) => (
               <Form className="relative justify-center">
                 <div className='grid justify-center items-center'>
                   <h2 className="w-72 text-xl text-center font-Roboto text-jetblack tracking-wide font-semibold sm:text-2xl">
                     Register New Staff
                   </h2>
                 </div>
+                {isRegistered && (
+                  <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm text-green-500">
+                    Staff registered successfully!
+                  </p>
+                )}
                 <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm">
                   Please enter staff details:
                 </p>
@@ -92,4 +106,5 @@ const StaffRegistrationForm = () => {
 };
 
 export default StaffRegistrationForm;
+
 
