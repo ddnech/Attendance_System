@@ -116,7 +116,7 @@ export default function LoginUser() {
                   </div>
                 </div>
                 <button
-                  className="w-full py-2 my-4 text-xs font-Roboto tracking-wide border rounded-md bg-steel_b text-flashwhite hover:bg-white hover:text-darkgreen hover:border-darkgreen"
+                  className="w-full py-2 my-4 text-xs font-Roboto tracking-wide border rounded-md bg-steel_b text-white hover:bg-white hover:text-darkgreen hover:border-darkgreen"
                   type="submit"
                   disabled={isSubmitting}
                 >

@@ -1,9 +1,9 @@
 const auth = require("./authController.js");
-const user = require("./userController.js");
 const admin = require("./adminController.js")
+const staff = require("./staffController.js")
 
 module.exports = {
   auth,
-  user,
-  admin
+  admin,
+  staff
 };

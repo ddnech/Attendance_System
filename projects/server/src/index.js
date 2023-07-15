@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { join } = require("path");
 const router = require("./routes");
+require('./schedule/absentStaff')
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -10,8 +11,6 @@ app.use(cors());
 
 app.use(express.json());
 
-// app.use("/src/Public/product", express.static("src/Public/product"));
-// app.use("/src/Public/profile", express.static("src/Public/profile"));
 
 
 
@@ -33,8 +32,7 @@ app.get("/api/greetings", (req, res, next) => {
 
 app.use("/api/auth", router.auth);
 app.use("/api/admin", router.admin);
-// app.use("/api/product", router.product);
-// app.use("/api/user", router.user);
+app.use("/api/staff", router.staff);
 
 // ===========================
 

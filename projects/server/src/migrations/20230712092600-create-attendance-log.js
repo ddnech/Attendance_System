@@ -31,6 +31,10 @@ module.exports = {
         type: Sequelize.ENUM('absent', 'half-day', 'full-day'),
         defaultValue: null,
       },
+      date: {
+        type: Sequelize.DATE,
+        allowNull:false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
