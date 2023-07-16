@@ -56,15 +56,17 @@ export default function SetPassword() {
       setSubmitting(false);
     }
   };
+  const pwdRgx = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
   const validationSchema = Yup.object().shape({
-    password: Yup.string()
-      .min(8, "Password must contain at least 8 characters")
-      .required("Password is required"),
-    confirm_password: Yup.string().required("Confirm Password is required"),
     full_name: Yup.string(),
-    birth_date: Yup.date(),
-  });
+    birth_date: Yup.date().max(new Date(), "Birth date can't be in the future"),
+    password: Yup.string().matches(pwdRgx, 'At least 8 chars, 1 symbol, 1 caps, and 1 number'
+    ).required('Password is required'),
+    confirm_password: Yup.string()
+        .oneOf([Yup.ref('password'), null], 'Passwords must match')
+        .required('Confirm Password is required'),
+});
 
   if (loading) {
     return <div>Loading...</div>;

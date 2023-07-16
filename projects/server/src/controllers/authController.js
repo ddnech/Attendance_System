@@ -6,6 +6,7 @@ const generateJWTToken = (user) => {
   const token = jwt.sign(
     {
       id: user.id,
+      role_id: user.role_id,
     },
     process.env.JWT_SECRET_KEY,
     { expiresIn: "7d" }
@@ -81,19 +82,16 @@ module.exports = {
 
   async getRole(req, res) {
     const userId = req.user.id;
-  
     try {
       const user = await db.User.findByPk(userId);
   
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).send({ message: "User not found" });
       }
-  
-      // Send the role ID as the response
       res.status(200).send({ role_id: user.role_id });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).send({ message: "Internal server error" });
     }
   },
 
@@ -116,6 +114,7 @@ module.exports = {
         message: "Successfully retrieved user profile",
         data: userProfile,
       });
+
     } catch (error) {
       console.log(error);
       return res.status(500).send({
@@ -130,8 +129,14 @@ module.exports = {
         where: {
           id: req.user.id,
         },
+        include: [
+            {
+                model: db.Salary,
+                attributes: ['basic_salary'],
+            }
+        ],
         attributes: { exclude: ["password","set_token"] },
-      });
+    });
 
       if (!userProfile) {
         return res.status(400).send({

@@ -4,10 +4,11 @@ import axios from 'axios';
 import { useSelector } from "react-redux";
 
 export default function LiveAttendance() {
-    const fullName = "John Doe"; // Replace with user's full name
 
     const [currentTime, setCurrentTime] = useState(dayjs());
     const [greeting, setGreeting] = useState("");
+    const [userProfile, setUserProfile] = useState({});
+    const [attendance, setAttendance] = useState({});
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -34,33 +35,26 @@ export default function LiveAttendance() {
 
     const token = useSelector((state) => state.auth.token)
 
-    const [attendanceRecords, setAttendanceRecords] = useState({});
-    const [isClockedIn, setIsClockedIn] = useState(false);
-    const [isClockedOut, setIsClockedOut] = useState(false);
-    const [isWeekday, setIsWeekday] = useState(false);
+    const fetchUserProfileAndAttendance = async () => {
+        try {
+            const responseProfile = await axios.get("http://localhost:8000/api/auth/user-profile", { headers: { Authorization: `Bearer ${token}` } });
+            setUserProfile(responseProfile.data.data);
+            const responseAttendance = await axios.get("http://localhost:8000/api/staff/check-attendance", { headers: { Authorization: `Bearer ${token}` } });
+            setAttendance(responseAttendance.data.data);
+        } catch (error) {
+            console.error(error.message);
+        }
+    };
 
     useEffect(() => {
-        const fetchAttendanceRecords = async () => {
-            try {
-                const response = await axios.get("http://localhost:8000/api/staff/attendance", { headers: { Authorization: `Bearer ${token}` } });
-                setAttendanceRecords(response.data.data);
-                setIsClockedIn(response.data.data.clock_in !== null);
-                setIsClockedOut(response.data.data.clock_out !== null);
-            } catch (error) {
-                console.error(error.message);
-            }
-        };
-        const currentDay = currentTime.day();
-        const isWeekday = currentDay >= 1 && currentDay <= 5;
-        setIsWeekday(isWeekday);
-        fetchAttendanceRecords();
+        fetchUserProfileAndAttendance();
     }, [currentTime, token]);
 
     const handleClockIn = () => {
         axios.post('http://localhost:8000/api/staff/clock-in', null, { headers: { Authorization: `Bearer ${token}` } })
             .then(response => {
                 console.log(response.data);
-                setIsClockedIn(true);
+                fetchUserProfileAndAttendance();
             })
             .catch(error => {
                 console.error(error);
@@ -68,10 +62,10 @@ export default function LiveAttendance() {
     };
 
     const handleClockOut = () => {
-        axios.post('http://localhost:8000/api/staff/clock-out', null, { headers: { Authorization: `Bearer ${token}` } })
+        axios.patch('http://localhost:8000/api/staff/clock-out', null, { headers: { Authorization: `Bearer ${token}` } })
             .then(response => {
                 console.log(response.data);
-                setIsClockedOut(true);
+                fetchUserProfileAndAttendance();
             })
             .catch(error => {
                 console.error(error);
@@ -84,7 +78,7 @@ export default function LiveAttendance() {
                 <div className="text-center mb-6">
                     <h1 className="text-3xl font-bold">{greeting}!</h1>
                     <p className="text-gray-500 text-lg mt-2">
-                        Hi, {fullName}!
+                        Hi, {userProfile.full_name}!
                         <br />
                         It's {currentTime.format("dddd, DD MMMM YYYY")}
                     </p>
@@ -94,28 +88,28 @@ export default function LiveAttendance() {
                         <div className="text-4xl font-bold text-black mb-4">
                             {currentTime.format("hh:mmA")}
                         </div>
-                        {isClockedIn ? (
-                            <p className="text-gray-500 mb-4">You have already clocked in.</p>
+                        {attendance.clock_in ? (
+                            <p className="text-gray-500 mb-4">You clocked in at {dayjs(attendance.clock_in).format("hh:mmA")}.</p>
                         ) : (
                             <button
                                 className={`py-2 px-4 rounded ${
-                                    (!isWeekday || isClockedOut) ? "text-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white"
+                                    (attendance.clock_out || currentTime.day() === 0 || currentTime.day() === 6) ? "text-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white"
                                 }`}
                                 onClick={handleClockIn}
-                                disabled={!isWeekday || isClockedOut}
+                                disabled={!!attendance.clock_out || currentTime.day() === 0 || currentTime.day() === 6 } // this line
                             >
                                 Clock In
                             </button>
                         )}
-                        {isClockedOut ? (
-                            <p className="text-gray-500 mt-2">You have already clocked out.</p>
+                        {attendance.clock_out ? (
+                            <p className="text-gray-500 mt-2">You clocked out at {dayjs(attendance.clock_out).format("hh:mmA")}.</p>
                         ) : (
                             <button
                                 className={`py-2 px-4 rounded ${
-                                    (!isClockedIn || !isWeekday) ? "text-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white"
+                                    (!attendance.clock_in || currentTime.day() === 0 || currentTime.day() === 6) ? "text-gray-500 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white"
                                 }`}
                                 onClick={handleClockOut}
-                                disabled={!isClockedIn || !isWeekday}
+                                disabled={!attendance.clock_in  || currentTime.day() === 0 || currentTime.day() === 6 } //thisline
                             >
                                 Clock Out
                             </button>
@@ -125,4 +119,5 @@ export default function LiveAttendance() {
             </div>
         </div>
     )
+    
 }

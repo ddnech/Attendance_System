@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 
 const StaffRegistrationForm = () => {
-  const token = useSelector((state) => state.auth.token)
+  const token = useSelector((state) => state.auth.token);
   const initialValues = {
     email: '',
     full_name: '',
@@ -15,15 +15,15 @@ const StaffRegistrationForm = () => {
   };
   const [isRegistered, setIsRegistered] = useState(false);
 
-  const validationSchema = Yup.object({
-    email: Yup.string().email('Invalid email').required('Required'),
-    full_name: Yup.string().required('Required'),
-    birth_date: Yup.date().required('Required'),
-    join_date: Yup.date().required('Required'),
-    salary: Yup.number().required('Required'),
+  const validationSchema = Yup.object().shape({
+    email: Yup.string().email('Please use a valid email format').required('Email is required'),
+    full_name: Yup.string().required("Full Name is required"),
+    birth_date: Yup.date().max(new Date(), "Birth date can't be in the future").required("Birth date is required"),
+    join_date: Yup.date().max(new Date(), "Join date can't be in the future").required("Join date is required"),
+    salary: Yup.number("Enter number format").required('Salary is required'),
   });
 
-  const onSubmit = async (values, { setSubmitting, resetForm }) => {
+  const onSubmit = async (values, { setStatus, setSubmitting, resetForm }) => {
     try {
       const response = await axios.post(
         'http://localhost:8000/api/admin/register',
@@ -35,24 +35,33 @@ const StaffRegistrationForm = () => {
         }
       );
       setIsRegistered(true);
+      setTimeout(() => setIsRegistered(false), 2000);
       resetForm();
     } catch (error) {
-      console.error('Error registering staff:', error);
-      alert('An error occurred during registration.');
+      const response = error.response;
+      if (response.status === 400) {
+        const errors = response.data.errors || [];
+        const emailError = errors.find(err => err.path === "email");
+        if (emailError) {
+          setStatus({ success: false, message: emailError.msg });
+          setTimeout(() => setStatus({}), 3000);
+        } else {
+          setStatus({ success: false, message: "An error occurred" });
+        }
+      } else if (response.status === 500) {
+        setStatus({ success: false, message: "Internal Server Error" });
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className='flex  justify-center h-screen bg-white rounde'>
-      <div className='w-fit grid grid-flow-row justify-center'>
-        <div>
-          <img src={"https://d1csarkz8obe9u.cloudfront.net/posterpreviews/business-logo-design-template-78655edda18bc1196ab28760f1535baa_screen.jpg?ts=1617645324"} alt="Logo" className="w-60 h-60 mx-auto" />
-        </div>
+    <div className='flex  justify-center h-screen bg-white rounded'>
+      <div className='w-fit grid grid-flow-row justify-center mt-20'>
         <div>
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-            {({ isSubmitting, resetForm }) => (
+            {({ isSubmitting, status }) => (
               <Form className="relative justify-center">
                 <div className='grid justify-center items-center'>
                   <h2 className="w-72 text-xl text-center font-Roboto text-jetblack tracking-wide font-semibold sm:text-2xl">
@@ -60,31 +69,32 @@ const StaffRegistrationForm = () => {
                   </h2>
                 </div>
                 {isRegistered && (
-                  <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm text-green-500">
+                  <p className="text-xs text-center font-Roboto mb-4 text-greenn tracking-wide sm:text-sm text-green-500">
                     Staff registered successfully!
                   </p>
                 )}
                 <p className="text-xs text-center font-Roboto mb-4 text-jetblack tracking-wide sm:text-sm">
                   Please enter staff details:
                 </p>
+                {status && !status.success && <div className='text-redd text-xs '>{status.message}</div>}
                 <div className='grid grid-cols-1 mt-7 mb-1 pb-3'>
                   <div className='font-Roboto relative'>
                     <ErrorMessage name='email' component='div' className='text-redd text-xs absolute -top-5' />
                     <Field className='border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0' type='email' name='email' placeholder='Email' />
                   </div>
-                  <div className='font-Roboto relative mt-4'>
+                  <div className='font-Roboto relative mt-8'>
                     <ErrorMessage name='full_name' component='div' className='text-redd text-xs absolute -top-5' />
                     <Field className='border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0' type='text' name='full_name' placeholder='Full Name' />
                   </div>
-                  <div className='font-Roboto relative mt-4'>
+                  <div className='font-Roboto relative mt-8'>
                     <ErrorMessage name='birth_date' component='div' className='text-redd text-xs absolute -top-5' />
                     <Field className='border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0' type='date' name='birth_date' placeholder='Birth Date' />
                   </div>
-                  <div className='font-Roboto relative mt-4'>
+                  <div className='font-Roboto relative mt-8'>
                     <ErrorMessage name='join_date' component='div' className='text-redd text-xs absolute -top-5' />
                     <Field className='border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0' type='date' name='join_date' placeholder='Join Date' />
                   </div>
-                  <div className='font-Roboto relative mt-4'>
+                  <div className='font-Roboto relative mt-8'>
                     <ErrorMessage name='salary' component='div' className='text-redd text-xs absolute -top-5' />
                     <Field className='border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0' type='number' name='salary' placeholder='Salary' />
                   </div>

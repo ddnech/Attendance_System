@@ -18,32 +18,6 @@ const validate = (validations) => {
       .send({ message: "An error occurs", errors: errors.array() });
   };
 };
-
-// helper
-const checkUsernameUnique = async (value, { req }) => {
-  try {
-    const user = await db.User.findOne({ where: { username: value } });
-    if (user) {
-      throw new Error("Username already taken");
-    }
-    return true;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-const checkStoreNameUnique = async (value, { req }) => {
-  try {
-    const user = await db.User.findOne({ where: { storeName: value } });
-    if (user) {
-      throw new Error("Store name already taken");
-    }
-    return true;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
 const checkEmailUnique = async (value, { req }) => {
   try {
     const user = await db.User.findOne({ where: { email: value } });
@@ -55,48 +29,77 @@ const checkEmailUnique = async (value, { req }) => {
     throw new Error(error.message);
   }
 };
-
-const checkPhoneUnique = async (value, { req }) => {
-  try {
-    const user = await db.User.findOne({ where: { phone: value } });
-    if (user) {
-      throw new Error("Phone number already taken");
-    }
-    return true;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
 module.exports = {
-  validateRegistration: validate([
-    body("username")
-      .trim()
-      .notEmpty()
-      .withMessage("Username is required")
-      .isLength({ max: 50 })
-      .withMessage("Maximum character is 50")
-      .custom(checkUsernameUnique),
-    body("storeName")
-      .trim()
-      .notEmpty()
-      .withMessage("Store name is required")
-      .isLength({ max: 50 })
-      .withMessage("Maximum character is 50")
-      .custom(checkStoreNameUnique),
+  validateLogin: validate([
     body("email")
       .notEmpty()
       .withMessage("Email is required")
       .isEmail()
-      .withMessage("Please enter with email format")
-      .custom(checkEmailUnique),
-    body("phone")
+      .withMessage("Email formart is required"),
+    body("password")
       .notEmpty()
-      .withMessage("Phone is required")
-      .isMobilePhone()
-      .withMessage("Invalid phone number")
-      .custom(checkPhoneUnique),
-    body("address").notEmpty().withMessage("Address is required"),
+      .withMessage("Password is required")
+      .isLength({ min: 8 })
+      .withMessage("Minimum password length is 8 characters"),
+  ]),
+
+  validateRegisterStaff: validate([
+    body("email")
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email format is required")
+      .custom(checkEmailUnique),
+    body("full_name").notEmpty().withMessage("Full name is required"),
+    body("birth_date")
+      .notEmpty()
+      .withMessage("Birth date is required")
+      .isDate()
+      .withMessage("Invalid date format")
+      .custom((value, { req }) => {
+        const currentDate = new Date();
+        const selectedDate = new Date(value);
+        if (selectedDate > currentDate) {
+          throw new Error("Birth date cannot be in the future");
+        }
+        return true;
+      }),
+    body("join_date")
+      .notEmpty()
+      .withMessage("Join date is required")
+      .isDate()
+      .withMessage("Invalid date format")
+      .custom((value, { req }) => {
+        const currentDate = new Date();
+        const selectedDate = new Date(value);
+        if (selectedDate > currentDate) {
+          throw new Error("Join date cannot be in the future");
+        }
+        return true;
+      }),
+    body("salary")
+      .notEmpty()
+      .withMessage("Salary is required")
+      .isNumeric()
+      .withMessage("Salary must be a numeric value"),
+  ]),
+
+  validateSetAccount: validate([
+    body("full_name").optional(),
+    body("birth_date")
+      .optional()
+      .isDate()
+      .withMessage("Invalid date format")
+      .custom((value, { req }) => {
+        if (value) {
+          const currentDate = new Date();
+          const selectedDate = new Date(value);
+          if (selectedDate > currentDate) {
+            throw new Error("Birth date cannot be in the future");
+          }
+        }
+        return true;
+      }),
     body("password")
       .notEmpty()
       .withMessage("Password is required")
@@ -110,46 +113,15 @@ module.exports = {
         "Password required minimal 8 characters, 1 uppercase, 1 symbol, and 1 number"
       )
       .custom((value, { req }) => {
-        if (value !== req.body.confirmPassword) {
+        if (value !== req.body.confirm_password) {
           throw new Error("Confirm password does not match with password");
         }
         return true;
       }),
-    body("confirmPassword")
+    body("confirm_password")
       .notEmpty()
       .withMessage("Confirm password is required")
       .isLength({ min: 8 })
       .withMessage("Minimum password length is 8 characters"),
   ]),
-
-  validateLogin: validate([
-    body("email").notEmpty().withMessage("Email is required")
-    .isEmail()
-    .withMessage("Please enter with email format"),
-    body("password").notEmpty()
-      .withMessage("Password is required")
-      .isLength({ min: 8 })
-      .withMessage("Minimum password length is 8 characters"),
-  ]),
-
-
-  validateSetPassword: validate([
-    body("password")
-      .notEmpty()
-      .withMessage("password is required")
-      .isStrongPassword({
-      minLength: 6,
-      minUppercase: 1,
-      minSymbols: 1,
-      minNumbers: 1,
-    })
-      .withMessage("Password must be 6 letters long and contain at least 1 uppercase letter, 1 number, and 1 symbol")
-      .custom((value, { req }) => {
-        if (value !== req.body.confirmPassword) {
-          throw new Error("confirm setPassword does not match with password");
-        }
-        return true;
-      }),
-  ]),
-
 };
