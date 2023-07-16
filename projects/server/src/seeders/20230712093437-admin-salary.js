@@ -11,6 +11,16 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+        {
+          basic_salary: 150000,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          basic_salary: 13000,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
       {}
     );

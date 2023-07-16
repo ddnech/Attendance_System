@@ -18,6 +18,28 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
+      { 
+        full_name: 'staff1',
+        email: 'staff1@example.com',
+        password: AdminPassword,
+        birth_date: new Date(1985, 1, 1),
+        join_date: new Date(2022, 1, 1),
+        role_id: 2,
+        salary_id: 2,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        full_name: 'staff2',
+        email: 'staff2@example.com',
+        password: AdminPassword,
+        birth_date: new Date(1985, 1, 1),
+        join_date: new Date(2022, 1, 1),
+        role_id: 2,
+        salary_id: 3,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
     ], {});
   },
 

@@ -7,7 +7,7 @@ dayjs.extend(utc);
 
 function isBusinessDay(date) {
   const day = date.utc().day();
-  return day !== 0 && day !== 6; // Exclude Sunday (0) and Saturday (6)
+  return day !== 0 && day !== 6;
 }
 
 /** @type {import('sequelize-cli').Migration} */
@@ -16,9 +16,11 @@ module.exports = {
     const statusOptions = ['absent', 'half-day', 'full-day'];
     const attendanceLogs = [];
 
-    for (let userId = 2; userId <= 4; userId += 2) {
-      let day = dayjs().startOf('day').subtract(3, 'month'); // Start from 2 months ago
-      const endDay = dayjs().startOf('day'); // Until today
+    const userIds = [2, 3];
+
+    for (const userId of userIds) {
+      let day = dayjs().startOf('day').subtract(3, 'month');
+      const endDay = dayjs().startOf('day');
 
       while (!day.isAfter(endDay)) {
         if (isBusinessDay(day)) {
