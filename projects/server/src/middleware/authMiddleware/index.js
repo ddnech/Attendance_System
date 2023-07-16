@@ -2,9 +2,7 @@ const jwt = require("jsonwebtoken");
 const db = require("../../models");
 
 module.exports = {
-
   async verifyToken(req, res, next) {
-
     const { authorization } = req.headers;
     if (!authorization) {
       res.status(401).send({
@@ -36,7 +34,7 @@ module.exports = {
 
   async verifyAdmin(req, res, next) {
     if (req.user.role_id === 1) {
-      console.log(req.user); 
+      console.log(req.user);
       return next();
     }
     res.status(401).send({
@@ -52,5 +50,4 @@ module.exports = {
       message: "role is not allowed to access",
     });
   },
-
 };

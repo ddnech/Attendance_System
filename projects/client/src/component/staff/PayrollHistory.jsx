@@ -65,7 +65,9 @@ export default function PayrollHistory() {
             <option value="">All Months</option>
             {/* List all 12 months */}
             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-              <option value={month} key={month}>{month}</option>
+              <option value={month} key={month}>
+                {month}
+              </option>
             ))}
           </select>
         </label>
@@ -97,10 +99,16 @@ export default function PayrollHistory() {
                 {new Date(item.date).toLocaleDateString()}
               </td>
               <td className="border-2 border-gray-300 p-2">
-                {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.amount)}
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                }).format(item.amount)}
               </td>
               <td className="border-2 border-gray-300 p-2">
-                {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.deductions)}
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                }).format(item.deductions)}
               </td>
             </tr>
           ))}

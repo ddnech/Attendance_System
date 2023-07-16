@@ -99,7 +99,7 @@ module.exports = {
     const filters = {
       page: Number(req.query.page) || 1,
       year: Number(req.query.year) || dayjs().year(),
-      month: Number(req.query.month) || dayjs().month() + 1, 
+      month: Number(req.query.month) || dayjs().month() + 1,
       status: req.query.status
         ? req.query.status.split(",")
         : ["absent", "half-day", "full-day"],
@@ -115,7 +115,7 @@ module.exports = {
       const totalBusinessDays = Array.from(
         { length: endOfMonth.date() },
         (_, i) => startOfMonth.clone().add(i, "day")
-      ).filter((d) => d.day() !== 0 && d.day() !== 6).length; // Exclude Sunday (0) and Saturday (6)
+      ).filter((d) => d.day() !== 0 && d.day() !== 6).length;
 
       const attendanceLogs = await db.AttendanceLog.findAndCountAll({
         where: {
@@ -134,7 +134,7 @@ module.exports = {
       });
 
       const attendanceStatistics = {
-        "absent": 0,
+        absent: 0,
         "half-day": 0,
         "full-day": 0,
         businessDays: totalBusinessDays,
@@ -162,52 +162,50 @@ module.exports = {
       });
     }
   },
-  
+
   async payrollHistory(req, res) {
-    const userId  = req.user.id;
+    const userId = req.user.id;
     const { year, month, sort } = req.query;
-  
-    const currentYear = year || dayjs().format('YYYY');
-    const currentMonth = month || dayjs().format('MM');
-  
+
+    const currentYear = year || dayjs().format("YYYY");
+    const currentMonth = month || dayjs().format("MM");
+
     const whereClause = {
       user_id: userId,
     };
-  
+
     whereClause[db.Sequelize.Op.and] = [
       db.Sequelize.where(
-        db.Sequelize.fn('YEAR', db.Sequelize.col('date')), 
-        '=', 
+        db.Sequelize.fn("YEAR", db.Sequelize.col("date")),
+        "=",
         currentYear
       ),
     ];
-    
+
     if (month) {
       whereClause[db.Sequelize.Op.and].push(
         db.Sequelize.where(
-          db.Sequelize.fn('MONTH', db.Sequelize.col('date')), 
-          '=', 
+          db.Sequelize.fn("MONTH", db.Sequelize.col("date")),
+          "=",
           currentMonth
         )
       );
     }
-  
+
     let orderClause = [];
     if (sort) {
-  
-      const [field, direction] = sort.split(',');
+      const [field, direction] = sort.split(",");
       orderClause.push([field, direction]);
     } else {
-
-      orderClause.push(['date', 'DESC']);
+      orderClause.push(["date", "DESC"]);
     }
-  
+
     try {
       const payrollRecords = await db.Payroll.findAll({
         where: whereClause,
         order: orderClause,
       });
-  
+
       res.json(payrollRecords);
     } catch (error) {
       res.status(500).json({ error: error.toString() });
@@ -216,53 +214,44 @@ module.exports = {
 
   async getAttendancePerDay(req, res) {
     try {
-        const attendance = await db.AttendanceLog.findOne({
-            where: {
-                user_id: req.user.id,
-                date: {
-                    [db.Sequelize.Op.between]: [
-                        dayjs().startOf("day").toDate(),
-                        dayjs().endOf("day").toDate(),
-                    ],
-                },
-            },
+      const attendance = await db.AttendanceLog.findOne({
+        where: {
+          user_id: req.user.id,
+          date: {
+            [db.Sequelize.Op.between]: [
+              dayjs().startOf("day").toDate(),
+              dayjs().endOf("day").toDate(),
+            ],
+          },
+        },
+      });
+
+      if (!attendance) {
+        return res.status(200).send({
+          message: "User has not clocked in or out today",
+          data: {
+            clock_in: null,
+            clock_out: null,
+          },
         });
+      }
 
-        if (!attendance) {
-            return res.status(200).send({ 
-                message: "User has not clocked in or out today",
-                data: {
-                    clock_in: null,
-                    clock_out: null
-                }
-            });
-        }
+      const { clock_in, clock_out } = attendance;
+      let message = "Successfully retrieved data";
+      if (!clock_in) {
+        message = "The staff has not clocked in yet";
+      } else if (!clock_out) {
+        message = `The staff clocked in at ${clock_in} and has not clocked out yet`;
+      } else {
+        message = `The staff clocked in at ${clock_in} and clocked out at ${clock_out}`;
+      }
 
-        const { clock_in, clock_out } = attendance;
-        let message = "Successfully retrieved data";
-        if (!clock_in) {
-            message = "The staff has not clocked in yet";
-        } else if (!clock_out) {
-            message = `The staff clocked in at ${clock_in} and has not clocked out yet`;
-        } else {
-            message = `The staff clocked in at ${clock_in} and clocked out at ${clock_out}`;
-        }
-
-        res.status(200).send({ message: message, data: attendance });
+      res.status(200).send({ message: message, data: attendance });
     } catch (error) {
-        console.log(error.message);
-        res
-            .status(500)
-            .send({ message: "Fatal error on server.", error: error.errors });
+      console.log(error.message);
+      res
+        .status(500)
+        .send({ message: "Fatal error on server.", error: error.errors });
     }
-}
-
-
-
-
-  
-  
-  
-  
-  
+  },
 };

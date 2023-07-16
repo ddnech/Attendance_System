@@ -61,7 +61,13 @@ export default function LoginUser() {
       <div className="grid justify-center mt-3 bg-white rounde">
         <div className="w-screen grid grid-flow-row justify-center">
           <div>
-        <img src={"https://d1csarkz8obe9u.cloudfront.net/posterpreviews/business-logo-design-template-78655edda18bc1196ab28760f1535baa_screen.jpg?ts=1617645324"} alt="Logo" className="w-60 h-60 mx-auto" />
+            <img
+              src={
+                "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/business-logo-design-template-78655edda18bc1196ab28760f1535baa_screen.jpg?ts=1617645324"
+              }
+              alt="Logo"
+              className="w-60 h-60 mx-auto"
+            />
           </div>
           <Formik
             initialValues={initialValues}
@@ -93,7 +99,11 @@ export default function LoginUser() {
                 </div>
                 <div className="grid grid-cols-1 mt-3">
                   <div className="font-Roboto relative">
-                  <ErrorMessage name='password' component='div' className='text-redd text-xs absolute -top-5' />
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="text-redd text-xs absolute -top-5"
+                    />
                     <Field
                       className="border border-gray-300 h-6 text-xs w-full focus:border-darkgreen focus:ring-0"
                       type={showPassword ? "text" : "password"}

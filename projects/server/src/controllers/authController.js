@@ -84,7 +84,7 @@ module.exports = {
     const userId = req.user.id;
     try {
       const user = await db.User.findByPk(userId);
-  
+
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }
@@ -114,7 +114,6 @@ module.exports = {
         message: "Successfully retrieved user profile",
         data: userProfile,
       });
-
     } catch (error) {
       console.log(error);
       return res.status(500).send({
@@ -130,13 +129,13 @@ module.exports = {
           id: req.user.id,
         },
         include: [
-            {
-                model: db.Salary,
-                attributes: ['basic_salary'],
-            }
+          {
+            model: db.Salary,
+            attributes: ["basic_salary"],
+          },
         ],
-        attributes: { exclude: ["password","set_token"] },
-    });
+        attributes: { exclude: ["password", "set_token"] },
+      });
 
       if (!userProfile) {
         return res.status(400).send({

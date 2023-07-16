@@ -1,6 +1,12 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AiOutlineUser, AiOutlineLogout, AiOutlineUserAdd, AiOutlineHistory, AiOutlineDollarCircle } from "react-icons/ai";
+import {
+  AiOutlineUser,
+  AiOutlineLogout,
+  AiOutlineUserAdd,
+  AiOutlineHistory,
+  AiOutlineDollarCircle,
+} from "react-icons/ai";
 import { useDispatch } from "react-redux";
 import { remove } from "../store/reducer/authSlice";
 
@@ -12,8 +18,16 @@ const adminRoutes = [
 
 const staffRoutes = [
   { to: "/home", icon: AiOutlineUser, label: "Personal Details" },
-  { to: "/attendance-history", icon: AiOutlineHistory, label: "Attendance History" },
-  { to: "/payroll-history", icon: AiOutlineDollarCircle, label: "Payroll History" },
+  {
+    to: "/attendance-history",
+    icon: AiOutlineHistory,
+    label: "Attendance History",
+  },
+  {
+    to: "/payroll-history",
+    icon: AiOutlineDollarCircle,
+    label: "Payroll History",
+  },
 ];
 
 export default function Sidebar({ roleId }) {
