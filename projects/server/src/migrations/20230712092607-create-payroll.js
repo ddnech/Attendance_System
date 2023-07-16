@@ -18,17 +18,17 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
-      start_date: {
-        type: Sequelize.DATE
-      },
-      end_date: {
-        type: Sequelize.DATE
+      date: {
+        type: Sequelize.DATE,
+        allowNull: false,
       },
       amount: {
-        type: Sequelize.FLOAT
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
       deductions: {
-        type: Sequelize.FLOAT
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,

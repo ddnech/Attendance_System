@@ -2,6 +2,10 @@ import React from "react";
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";
 import StaffRegistrationForm from "../component/admin/StaffRegiser";
+import AttendanceHistory from "../component/staff/AttendanceHistory";
+import PayrollHistory from "../component/staff/PayrollHistory";
+import ClockAttendance from "../component/staff/ClockAttendance";
+
 
 export default function Home() {
   return (
@@ -11,7 +15,10 @@ export default function Home() {
       </div>
       <div>
         <Header />
-        <StaffRegistrationForm/>
+        {/* <StaffRegistrationForm/> */}
+        <AttendanceHistory/>
+        <PayrollHistory/>
+        <ClockAttendance/>
       </div>
     </div>
   );

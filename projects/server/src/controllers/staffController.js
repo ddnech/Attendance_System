@@ -97,24 +97,31 @@ module.exports = {
       page: Number(req.query.page) || 1,
       year: Number(req.query.year) || dayjs().year(),
       month: Number(req.query.month) || dayjs().month() + 1, // +1 because dayjs months are 0-indexed
-      status: req.query.status ? req.query.status.split(',') : ['absent', 'half-day', 'full-day'],
-      sort: req.query.sort || 'DESC',
+      status: req.query.status
+        ? req.query.status.split(",")
+        : ["absent", "half-day", "full-day"],
+      sort: req.query.sort || "DESC",
     };
-  
+
     try {
-      const startOfMonth = dayjs(`${filters.year}-${filters.month}-01`).startOf("month");
+      const startOfMonth = dayjs(`${filters.year}-${filters.month}-01`).startOf(
+        "month"
+      );
       const endOfMonth = startOfMonth.clone().endOf("month");
-  
+
       const totalBusinessDays = Array.from(
         { length: endOfMonth.date() },
         (_, i) => startOfMonth.clone().add(i, "day")
       ).filter((d) => d.day() !== 0 && d.day() !== 6).length; // Exclude Sunday (0) and Saturday (6)
-  
+
       const attendanceLogs = await db.AttendanceLog.findAndCountAll({
         where: {
           user_id: req.user.id,
           date: {
-            [db.Sequelize.Op.between]: [startOfMonth.toDate(), endOfMonth.toDate()],
+            [db.Sequelize.Op.between]: [
+              startOfMonth.toDate(),
+              endOfMonth.toDate(),
+            ],
           },
           status: {
             [db.Sequelize.Op.in]: filters.status,
@@ -122,18 +129,18 @@ module.exports = {
         },
         order: [["date", filters.sort]],
       });
-  
+
       const attendanceStatistics = {
-        absent: 0,
+        "absent": 0,
         "half-day": 0,
         "full-day": 0,
         businessDays: totalBusinessDays,
       };
-  
+
       for (const log of attendanceLogs.rows) {
         attendanceStatistics[log.status]++;
       }
-  
+
       res.send({
         message: "Successfully retrieved attendance history",
         filters,
@@ -151,6 +158,92 @@ module.exports = {
         message: "An error occurred while processing your request",
       });
     }
-  }
+  },
+  
+  async payrollHistory(req, res) {
+    const userId  = req.user.id;
+    const { year, month, sort } = req.query;
+  
+    // default to current year if no year query parameter is provided
+    const currentYear = year || dayjs().format('YYYY');
+    const currentMonth = month || dayjs().format('MM');
+  
+    const whereClause = {
+      user_id: userId,
+    };
+  
+    whereClause[db.Sequelize.Op.and] = [
+      db.Sequelize.where(
+        db.Sequelize.fn('YEAR', db.Sequelize.col('date')), 
+        '=', 
+        currentYear
+      ),
+    ];
+    
+    if (month) {
+      whereClause[db.Sequelize.Op.and].push(
+        db.Sequelize.where(
+          db.Sequelize.fn('MONTH', db.Sequelize.col('date')), 
+          '=', 
+          currentMonth
+        )
+      );
+    }
+  
+    let orderClause = [];
+    if (sort) {
+      // split sort into field and direction
+      const [field, direction] = sort.split(',');
+      orderClause.push([field, direction]);
+    } else {
+      // default order
+      orderClause.push(['date', 'DESC']);
+    }
+  
+    try {
+      const payrollRecords = await db.Payroll.findAll({
+        where: whereClause,
+        order: orderClause,
+      });
+  
+      res.json(payrollRecords);
+    } catch (error) {
+      res.status(500).json({ error: error.toString() });
+    }
+  },
+
+  async getAttendancePerDay(req, res) {
+    try {
+      const user = await db.AttendanceLog.findOne({
+        where: {
+          user_id: req.user.id,
+          date: {
+            [db.Sequelize.Op.between]: [
+              dayjs().startOf("day").toDate(),
+              dayjs().endOf("day").toDate(),
+            ],
+          },
+        },
+      });
+
+      if (!user) {
+        return res.status(204).send({ message: "Attendance not found" });
+      }
+
+      res
+        .status(200)
+        .send({ message: "Sucessfully retrieved data", data: user });
+    } catch (error) {
+      console.log(error.message);
+      res
+        .status(500)
+        .send({ message: "Fatal error on server.", error: error.errors });
+    }
+  },
+
+  
+  
+  
+  
   
 };

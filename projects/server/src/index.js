@@ -4,7 +4,7 @@ const cors = require("cors");
 const { join } = require("path");
 const router = require("./routes");
 require('./schedule/absentStaff')
-
+require('./schedule/payrollStaff')
 const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(cors());
