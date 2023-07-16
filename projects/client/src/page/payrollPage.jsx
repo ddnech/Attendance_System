@@ -1,13 +1,12 @@
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";
-import ClockAttendance from "../component/staff/ClockAttendance";
-import UserProfile from "../component/user/PersonalDetails";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import React, { useState, useEffect } from 'react';
 import withAuth from "../component/withAuth";
+import Payroll from "../component/staff/PayrollHistory";
 
-function Home() {
+function PayrollHistory() {
   const [roleId, setRoleId] = useState(null);
   const token = useSelector((state) => state.auth.token);
 
@@ -33,21 +32,10 @@ function Home() {
       </div>
       <div>
         <Header />
-        {roleId === 1 ? 
-          <UserProfile />
-        :
-          <div className="flex justify-center space-x-4 p-4">
-            <div className=" p-4">
-              <UserProfile />
-            </div>
-            <div className="p-4">
-              <ClockAttendance />
-            </div>
-          </div>
-        }
+        <Payroll/>
       </div>
     </div>
   );
 }
 
-export default withAuth(Home);
+export default withAuth(PayrollHistory);

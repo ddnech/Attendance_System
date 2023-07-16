@@ -3,15 +3,19 @@ const dayjs = require("dayjs");
 const isToday = require("dayjs/plugin/isToday");
 dayjs.extend(isToday);
 
+function isWeekday() {
+  const dayOfWeek = dayjs().day();
+  return dayOfWeek >= 1 && dayOfWeek <= 5;
+}
+
 module.exports = {
   async clockIn(req, res) {
     try {
       const userId = req.user.id;
 
-      // if (!dayjs().isBusinessDay()) {
-      //   return res.status(400).json({ error: "Today is not a business day." });
-      // }
-
+      if (!isWeekday()) {
+        return res.status(400).send({ error: "Today is not a business day." });
+      }
       const existingEntry = await db.AttendanceLog.findOne({
         where: {
           user_id: userId,
@@ -92,11 +96,10 @@ module.exports = {
   },
 
   async getAttendanceHistory(req, res) {
-    // Parse and set the default values for filters and sort order
     const filters = {
       page: Number(req.query.page) || 1,
       year: Number(req.query.year) || dayjs().year(),
-      month: Number(req.query.month) || dayjs().month() + 1, // +1 because dayjs months are 0-indexed
+      month: Number(req.query.month) || dayjs().month() + 1, 
       status: req.query.status
         ? req.query.status.split(",")
         : ["absent", "half-day", "full-day"],
@@ -164,7 +167,6 @@ module.exports = {
     const userId  = req.user.id;
     const { year, month, sort } = req.query;
   
-    // default to current year if no year query parameter is provided
     const currentYear = year || dayjs().format('YYYY');
     const currentMonth = month || dayjs().format('MM');
   
@@ -192,11 +194,11 @@ module.exports = {
   
     let orderClause = [];
     if (sort) {
-      // split sort into field and direction
+  
       const [field, direction] = sort.split(',');
       orderClause.push([field, direction]);
     } else {
-      // default order
+
       orderClause.push(['date', 'DESC']);
     }
   
@@ -214,32 +216,49 @@ module.exports = {
 
   async getAttendancePerDay(req, res) {
     try {
-      const user = await db.AttendanceLog.findOne({
-        where: {
-          user_id: req.user.id,
-          date: {
-            [db.Sequelize.Op.between]: [
-              dayjs().startOf("day").toDate(),
-              dayjs().endOf("day").toDate(),
-            ],
-          },
-        },
-      });
+        const attendance = await db.AttendanceLog.findOne({
+            where: {
+                user_id: req.user.id,
+                date: {
+                    [db.Sequelize.Op.between]: [
+                        dayjs().startOf("day").toDate(),
+                        dayjs().endOf("day").toDate(),
+                    ],
+                },
+            },
+        });
 
-      if (!user) {
-        return res.status(204).send({ message: "Attendance not found" });
-      }
+        if (!attendance) {
+            return res.status(200).send({ 
+                message: "User has not clocked in or out today",
+                data: {
+                    clock_in: null,
+                    clock_out: null
+                }
+            });
+        }
 
-      res
-        .status(200)
-        .send({ message: "Sucessfully retrieved data", data: user });
+        const { clock_in, clock_out } = attendance;
+        let message = "Successfully retrieved data";
+        if (!clock_in) {
+            message = "The staff has not clocked in yet";
+        } else if (!clock_out) {
+            message = `The staff clocked in at ${clock_in} and has not clocked out yet`;
+        } else {
+            message = `The staff clocked in at ${clock_in} and clocked out at ${clock_out}`;
+        }
+
+        res.status(200).send({ message: message, data: attendance });
     } catch (error) {
-      console.log(error.message);
-      res
-        .status(500)
-        .send({ message: "Fatal error on server.", error: error.errors });
+        console.log(error.message);
+        res
+            .status(500)
+            .send({ message: "Fatal error on server.", error: error.errors });
     }
-  },
+}
+
+
+
 
   
   

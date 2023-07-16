@@ -21,11 +21,7 @@ export default function AttendanceHistory() {
   const getAttendanceHistory = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/staff/attendance/history?year=${
-          filters.year
-        }&month=${filters.month}&status=${filters.status.join(",")}&sort=${
-          filters.sort
-        }`,
+        `http://localhost:8000/api/staff/attendance/history?year=${filters.year}&month=${filters.month}&status=${filters.status.join(",")}&sort=${filters.sort}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

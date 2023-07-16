@@ -4,20 +4,15 @@ const { verifyToken } = require("../middleware/authMiddleware");
 const validatorMiddleware = require("../middleware/validatorMiddleware");
 const router = require("express").Router();
 
-// router.post(
-//   "/register",
-//   validatorMiddleware.validateRegistration,
-//   authController.registerUser
-// );
 
 router.post(
   "/login",
-  //validatorMiddleware.validateLogin,
+  validatorMiddleware.validateLogin,
   authController.loginUser);
 
 router.post(
   "/set-pass",
-  //validatorMiddleware.validateSetPassword,
+  validatorMiddleware.validateSetAccount,
   authController.setPassword
 )
 
@@ -27,13 +22,11 @@ router.get(
 
 router.get(
   "/profile",
-  //validatorMiddleware.validateSetPassword,
   authController.getUserProfileToken
 )
 router.get(
   "/user-profile",
   authMiddleware.verifyToken,
-  //validatorMiddleware.validateSetPassword,
   authController.getUserProfile
 )
 

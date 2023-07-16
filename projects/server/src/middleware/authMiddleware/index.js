@@ -34,4 +34,23 @@ module.exports = {
     }
   },
 
+  async verifyAdmin(req, res, next) {
+    if (req.user.role_id === 1) {
+      console.log(req.user); 
+      return next();
+    }
+    res.status(401).send({
+      message: "role is not allowed to access",
+    });
+  },
+
+  async verifyStaff(req, res, next) {
+    if (req.user.role_id === 2) {
+      return next();
+    }
+    res.status(401).send({
+      message: "role is not allowed to access",
+    });
+  },
+
 };
