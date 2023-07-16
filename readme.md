@@ -1,8 +1,4 @@
-# Purwadhika Mini Project 3 Repository
-
-## Team:
-- Vanessa
-- David
+# Purwadhika Selection Test
 
 
 This is monorepo contain frontend project using ReactJS and backend project using ExpressJS.

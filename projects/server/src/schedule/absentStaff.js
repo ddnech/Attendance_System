@@ -8,7 +8,7 @@ const isBusinessDay = (date) => {
     return date.day() > 0 && date.day() < 6;
 }
 
-const job = schedule.scheduleJob('* * * * *', async () => {
+const job = schedule.scheduleJob('0 22 * * *', async () => {
    
     if (!isBusinessDay(dayjs())) {
         return;
