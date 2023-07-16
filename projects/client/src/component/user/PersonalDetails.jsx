@@ -30,7 +30,7 @@ export default function UserProfile() {
                     <p><strong>Email:</strong> {userProfile.email}</p>
                     <p><strong>Birth Date:</strong> {dayjs(userProfile.birth_date).format('DD MMMM YYYY')}</p>
                     <p><strong>Join Date:</strong> {dayjs(userProfile.join_date).format('DD MMMM YYYY')}</p>
-                    <p><strong>Basic Salary:</strong> {userProfile.Salary ? userProfile.Salary.basic_salary : 'N/A'}</p>
+                    <p><strong>Basic Salary:</strong> {userProfile.Salary ? `RP ${userProfile.Salary.basic_salary.toLocaleString('id-ID')}` : 'N/A'}</p>
                 </div>
             </div>
         </div>
