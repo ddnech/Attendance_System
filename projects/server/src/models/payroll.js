@@ -14,12 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Payroll.init({
-    basicSalary: DataTypes.INTEGER,
-    deduction: DataTypes.INTEGER,
-    netSalary: DataTypes.INTEGER,
-    userId: DataTypes.INTEGER,
-    month: DataTypes.INTEGER,
-    year: DataTypes.INTEGER
+    user_id: DataTypes.INTEGER,
+    date:DataTypes.DATE,
+    amount: DataTypes.INTEGER,
+    deductions: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Payroll',

@@ -7,7 +7,7 @@ module.exports = {
       "Salaries",
       [
         {
-          basic_salary: 10000000,
+          basic_salary: 15000000,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

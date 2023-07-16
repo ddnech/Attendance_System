@@ -6,7 +6,6 @@ const generateJWTToken = (user) => {
   const token = jwt.sign(
     {
       id: user.id,
-      role_id: user.role_id,
     },
     process.env.JWT_SECRET_KEY,
     { expiresIn: "7d" }
@@ -18,30 +17,28 @@ module.exports = {
   async loginUser(req, res) {
     try {
       const { email, password } = req.body;
-  
+
       const user = await db.User.findOne({
         where: {
           email,
         },
       });
-  
+
       if (user) {
         const passwordMatch = await bcrypt.compare(password, user.password);
-  
+
         if (passwordMatch) {
           const token = generateJWTToken(user);
           return res.status(200).send({ message: "Login successful", token });
         }
       }
-  
+
       res.status(401).send({ error: "Invalid email or password" });
     } catch (error) {
       console.error("Error during login:", error);
       res.status(500).send({ error: "Internal server error" });
     }
   },
-  
-  
 
   async setPassword(req, res) {
     try {
@@ -82,6 +79,24 @@ module.exports = {
     }
   },
 
+  async getRole(req, res) {
+    const userId = req.user.id;
+  
+    try {
+      const user = await db.User.findByPk(userId);
+  
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // Send the role ID as the response
+      res.status(200).send({ role_id: user.role_id });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
   async getUserProfileToken(req, res) {
     try {
       const userProfile = await db.User.findOne({
@@ -89,6 +104,33 @@ module.exports = {
           set_token: req.query.token,
         },
         attributes: { exclude: ["password"] },
+      });
+
+      if (!userProfile) {
+        return res.status(400).send({
+          message: "User profile not found",
+        });
+      }
+
+      return res.status(200).send({
+        message: "Successfully retrieved user profile",
+        data: userProfile,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({
+        message: "Internal Server Error",
+      });
+    }
+  },
+
+  async getUserProfile(req, res) {
+    try {
+      const userProfile = await db.User.findOne({
+        where: {
+          id: req.user.id,
+        },
+        attributes: { exclude: ["password","set_token"] },
       });
 
       if (!userProfile) {
