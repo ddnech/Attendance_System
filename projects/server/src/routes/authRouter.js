@@ -12,7 +12,7 @@ router.post(
 
 router.post(
   "/set-pass",
-  validatorMiddleware.validateSetAccount,
+  //validatorMiddleware.validateSetAccount,
   authController.setPassword
 )
 
