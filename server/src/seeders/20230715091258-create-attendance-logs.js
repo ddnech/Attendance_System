@@ -2,8 +2,9 @@
 const dayjs = require("dayjs");
 const { isWorkday } = require("../utils/workdays");
 
-// About three months of attendance for the two demo staff, up to yesterday.
-// Today is left empty so you can try clocking in yourself.
+// About three months of attendance for the demo staff, up to yesterday.
+// Today: a few people have already clocked in (if it's a workday), so the admin's
+// "Today" page has something on it. Nadia is left alone so you can clock in as her.
 
 // Small seeded random generator, so the demo data is the same every time.
 function random(seed) {
@@ -16,10 +17,18 @@ function random(seed) {
   };
 }
 
+// id, how often they're absent, how often they forget to clock out,
+// and whether they've already clocked in today.
 const STAFF = [
-  { id: 2, seed: 7, absentRate: 0.04, halfRate: 0.08 },
-  { id: 3, seed: 21, absentRate: 0.1, halfRate: 0.15 },
+  { id: 2, seed: 7, absentRate: 0.03, halfRate: 0.06, inToday: false }, // Nadia: reliable, keep today free
+  { id: 3, seed: 21, absentRate: 0.1, halfRate: 0.14, inToday: true }, // Kevin: a few absences
+  { id: 4, seed: 33, absentRate: 0.02, halfRate: 0.03, inToday: true }, // Citra: almost perfect
+  { id: 5, seed: 48, absentRate: 0.12, halfRate: 0.1, inToday: false }, // Rizky: absent more often
+  { id: 6, seed: 51, absentRate: 0.04, halfRate: 0.05, inToday: true }, // Melati
+  { id: 7, seed: 64, absentRate: 0.05, halfRate: 0.25, inToday: true }, // Bayu: forgets to clock out
+  { id: 8, seed: 77, absentRate: 0.05, halfRate: 0.08, inToday: false }, // Intan: joined 1 Sep 2026
 ];
+const JOINED = { 8: "2026-09-01" };
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -27,11 +36,15 @@ module.exports = {
     if (process.env.SEED_DEMO_DATA === "false") return;
 
     const rows = [];
-    const first = dayjs().subtract(3, "month").startOf("month");
-    const yesterday = dayjs().subtract(1, "day").startOf("day");
+    const now = dayjs();
+    const yesterday = now.subtract(1, "day").startOf("day");
 
     for (const person of STAFF) {
       const rand = random(person.seed);
+      const earliest = now.subtract(3, "month").startOf("month");
+      const joined = JOINED[person.id] ? dayjs(JOINED[person.id]) : earliest;
+      const first = joined.isAfter(earliest) ? joined : earliest;
+
       for (let day = first; !day.isAfter(yesterday, "day"); day = day.add(1, "day")) {
         if (!isWorkday(day)) continue;
 
@@ -50,6 +63,20 @@ module.exports = {
           status,
           createdAt: day.toDate(),
           updatedAt: day.toDate(),
+        });
+      }
+
+      // Today: clocked in earlier this morning, still working.
+      const clockInToday = now.startOf("day").hour(7).minute(45).add(Math.floor(rand() * 105), "minute");
+      if (person.inToday && isWorkday(now) && clockInToday.isBefore(now)) {
+        rows.push({
+          user_id: person.id,
+          date: now.format("YYYY-MM-DD"),
+          clock_in: clockInToday.toDate(),
+          clock_out: null,
+          status: "half-day",
+          createdAt: clockInToday.toDate(),
+          updatedAt: clockInToday.toDate(),
         });
       }
     }

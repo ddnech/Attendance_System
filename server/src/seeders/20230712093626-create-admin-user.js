@@ -1,9 +1,20 @@
 "use strict";
 const bcrypt = require("bcryptjs");
 
-// Demo accounts. Everyone who has a password uses: Password12!
-// Sari hasn't set up her account yet, so she shows up as "invite pending".
-// Her setup link is  <APP_URL>/set-pass/demo-invite-link
+// Demo accounts, all made up. Everyone who has a password uses: Password12!
+const PEOPLE = [
+  // [id, full name, email, birth date, join date, role]
+  [1, "Yusuf Halim", "admin@example.com", "1990-02-01", "2021-07-01", 1],
+  [2, "Nadia Rahman", "staff1@example.com", "1997-06-14", "2022-03-01", 2],
+  [3, "Kevin Tanjung", "staff2@example.com", "1999-11-03", "2023-01-09", 2],
+  [4, "Citra Anggraini", "staff3@example.com", "1994-08-22", "2021-10-04", 2],
+  [5, "Rizky Firmansyah", "staff4@example.com", "2001-03-17", "2024-02-05", 2],
+  [6, "Melati Hasibuan", "staff5@example.com", "1992-12-09", "2020-05-11", 2],
+  [7, "Bayu Saputra", "staff6@example.com", "1998-05-30", "2023-08-14", 2],
+  [8, "Intan Permata", "staff7@example.com", "2000-01-25", "2026-09-01", 2],
+  [9, "Dimas Ardiansyah", "dimas@example.com", "2000-04-21", "2026-10-12", 2],
+];
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
@@ -11,58 +22,23 @@ module.exports = {
     const now = new Date();
     const inviteExpires = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
-    const users = [
-      {
-        id: 1,
-        full_name: "David Tanri",
-        email: "admin@example.com",
-        password,
-        birth_date: "1995-02-01",
-        join_date: "2022-02-01",
-        role_id: 1,
-        salary_id: 1,
+    const users = PEOPLE.map(([id, full_name, email, birth_date, join_date, role_id]) => {
+      const pending = email === "dimas@example.com";
+      return {
+        id,
+        full_name,
+        email,
+        birth_date,
+        join_date,
+        role_id,
+        salary_id: id,
+        password: pending ? null : password,
+        set_token: pending ? "demo-invite-link" : null,
+        set_token_expires_at: pending ? inviteExpires : null,
         createdAt: now,
         updatedAt: now,
-      },
-      {
-        id: 2,
-        full_name: "Rina Wijaya",
-        email: "staff1@example.com",
-        password,
-        birth_date: "1997-06-14",
-        join_date: "2022-03-01",
-        role_id: 2,
-        salary_id: 2,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: 3,
-        full_name: "Budi Santoso",
-        email: "staff2@example.com",
-        password,
-        birth_date: "1999-11-03",
-        join_date: "2023-01-09",
-        role_id: 2,
-        salary_id: 3,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: 4,
-        full_name: "Sari Lestari",
-        email: "sari@example.com",
-        password: null,
-        set_token: "demo-invite-link",
-        set_token_expires_at: inviteExpires,
-        birth_date: "2000-04-21",
-        join_date: "2026-01-05",
-        role_id: 2,
-        salary_id: 4,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ];
+      };
+    });
 
     // SEED_DEMO_DATA=false keeps only the admin account.
     const demo = process.env.SEED_DEMO_DATA !== "false";
@@ -70,6 +46,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Users", { id: { [Sequelize.Op.in]: [1, 2, 3, 4] } });
+    await queryInterface.bulkDelete("Users", { id: { [Sequelize.Op.in]: PEOPLE.map((p) => p[0]) } });
   },
 };
